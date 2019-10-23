@@ -70,13 +70,25 @@ function obj:dispatchURL(scheme, host, params, fullUrl)
       local p = pair[1]
       local app = pair[2]
       local func = pair[3]
-      if string.match(url, p) then
-         id = app
-         if id ~= nil then
-            self.logger.df("Match found, opening with '%s'", id)
-            hs.application.launchOrFocusByBundleID(id)
-            hs.urlevent.openURLWithBundle(url, id)
-            return
+     if string.match(app, "/Applications/Firefox*") then
+        -- application path based
+        if string.match(url, p) then
+           self.logger.df("Match found, opening with '%s'", app)
+           local launchcmd = app.." --new-tab "..url
+           self.logger.df("Launching with '%s'", launchcmd)
+           os.execute(launchcmd)
+           return
+        end
+      else
+         -- bundle id based
+         if string.match(url, p) then
+            id = app
+            if id ~= nil then
+               self.logger.df("Match found, opening with '%s'", id)
+               hs.application.launchOrFocusByBundleID(id)
+               hs.urlevent.openURLWithBundle(url, id)
+               return
+            end
          end
          if func ~= nil then
             self.logger.df("Match found, calling func '%s'", func)
